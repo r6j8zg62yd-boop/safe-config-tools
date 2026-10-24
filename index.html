@@ -1,90 +1,162 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unfaithful Crieves — Safe Dashboard</title>
+<title>Crieves — a read-only window into your Safe</title>
 <style>
   :root {
     --bg: #0b0e14;
     --card: #141922;
+    --cardTop: #101520;
     --line: #232b38;
     --text: #e6ebf2;
     --muted: #8b98ab;
     --accent: #12ff80;
+    --accentInk: #04120a;
     --warn: #ffb020;
     --btn: #1d2531;
     --btnActive: #26303f;
     --glow: #16202e;
-    --chipBg: rgba(18,255,128,0.1);
-    --chipWarnBg: rgba(255,176,32,0.12);
+    --chip: rgba(18,255,128,0.1);
+    --chipWarn: rgba(255,176,32,0.12);
   }
   html[data-theme="light"] {
     --bg: #f4f6fa;
     --card: #ffffff;
+    --cardTop: #eef2f7;
     --line: #e3e8ef;
     --text: #0f172a;
     --muted: #64748b;
     --accent: #0a8f4d;
+    --accentInk: #ffffff;
     --warn: #b45309;
     --btn: #eef2f7;
     --btnActive: #e2e8f0;
     --glow: #dfe7f2;
-    --chipBg: rgba(10,143,77,0.1);
-    --chipWarnBg: rgba(180,83,9,0.1);
+    --chip: rgba(10,143,77,0.1);
+    --chipWarn: rgba(180,83,9,0.1);
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0;
-    padding: 24px 16px 48px;
-    background: radial-gradient(1200px 600px at 50% -200px, var(--glow) 0%, var(--bg) 60%);
     color: var(--text);
-    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  .wrap { max-width: 720px; margin: 0 auto; }
-  header { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-  .logo {
-    width: 34px; height: 34px; border-radius: 10px; flex: none;
-    background: linear-gradient(140deg, var(--accent), #0a8f4d);
-    display: grid; place-items: center; color: #04120a; font-weight: 800; font-size: 17px;
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 20;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    border-bottom: 1px solid var(--line);
   }
-  h1 { font-size: 20px; margin: 0; letter-spacing: -0.2px; }
-  .sub { color: var(--muted); font-size: 13px; margin: 2px 0 22px; }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 58px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 700; letter-spacing: -0.2px; }
+  .mark {
+    width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+    background: linear-gradient(140deg, var(--accent), #0a8f4d); color: var(--accentInk);
+    font-size: 14px; font-weight: 800;
+  }
+  nav a { color: var(--muted); text-decoration: none; font-size: 13.5px; }
+  nav a:hover { color: var(--text); }
+  nav .links { display: flex; gap: 18px; align-items: center; }
+
+  .hero { position: relative; padding: 64px 0 56px; text-align: center; }
+  .hero::before {
+    content: ""; position: absolute; inset: -120px 0 auto; height: 420px; z-index: -1;
+    background: radial-gradient(600px 300px at 50% 40%, rgba(18,255,128,0.13), transparent 70%);
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 7px; padding: 5px 12px; border-radius: 999px;
+    background: var(--chip); color: var(--accent); font-size: 12px; font-weight: 600; margin-bottom: 18px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+  h1 {
+    font-size: clamp(32px, 8vw, 52px); line-height: 1.07; letter-spacing: -1.4px;
+    margin: 0 0 16px; font-weight: 720;
+  }
+  h1 .gr {
+    background: linear-gradient(100deg, var(--accent), #7ef7b6 60%, #6fd2ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { color: var(--muted); font-size: 16.5px; max-width: 560px; margin: 0 auto 28px; }
+  .cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    padding: 12px 20px; border-radius: 11px; font-size: 14.5px; font-weight: 620;
+    border: 1px solid var(--line); color: var(--text); background: var(--btn); cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--btnActive); }
+  .btn.primary {
+    background: var(--accent); color: var(--accentInk); border-color: transparent;
+    box-shadow: 0 8px 26px -10px rgba(18,255,128,0.6);
+  }
+  .btn.primary:hover { filter: brightness(1.06); background: var(--accent); }
+  .btn.sm { padding: 8px 14px; font-size: 13px; border-radius: 9px; font-weight: 550; }
+
+  .pick { display: flex; gap: 8px; justify-content: center; margin: 30px 0 -14px; flex-wrap: wrap; }
+  .pick button {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 12.5px; cursor: pointer;
+  }
+  .pick button.on { color: var(--accent); border-color: var(--accent); background: var(--chip); }
+  .strip {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin: 44px auto 0; max-width: 640px;
+  }
+  .strip div {
+    background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: 13px 14px;
+  }
+  .strip .k { color: var(--muted); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .strip .v { font-size: 19px; font-weight: 660; letter-spacing: -0.4px; margin-top: 3px; }
+
+  section { padding: 52px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 25px; letter-spacing: -0.7px; margin: 0 0 8px; }
+  .sec-lede { color: var(--muted); margin: 0 0 26px; font-size: 15px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
   .card {
-    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 16px; margin-bottom: 14px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 15px; padding: 18px;
   }
-  .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
-  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; word-break: break-all; }
-  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
-  .row:last-child { border-bottom: 0; }
-  .row .k { color: var(--muted); font-size: 13px; }
-  .row .v { text-align: right; font-size: 13.5px; }
-  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
-  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; }
-  .stat .num { font-size: 22px; font-weight: 650; margin-top: 4px; letter-spacing: -0.5px; }
-  .addr { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
-  button.copy {
-    background: var(--btn); color: var(--text); border: 1px solid var(--line);
-    border-radius: 8px; padding: 6px 11px; font-size: 12px; cursor: pointer; flex: none;
+  .card .ico {
+    width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
+    background: var(--chip); color: var(--accent); margin-bottom: 12px; font-size: 15px;
   }
-  button.copy:active { background: var(--btnActive); }
+  .card h3 { margin: 0 0 6px; font-size: 15px; font-weight: 650; }
+  .card p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+
+  /* ---- live dashboard ---- */
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .bar .acts { display: flex; gap: 8px; }
   .pill {
     display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
-    font-size: 12px; font-weight: 600; background: var(--chipBg); color: var(--accent);
+    font-size: 12px; font-weight: 600; background: var(--chip); color: var(--accent);
   }
-  .pill.warn { background: var(--chipWarnBg); color: var(--warn); }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
-  .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; }
-  .bar .acts { display: flex; gap: 8px; }
-  .bar button {
-    background: var(--btn); color: var(--text); border: 1px solid var(--line); border-radius: 9px;
-    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  .pill.warn { background: var(--chipWarn); color: var(--warn); }
+  #switch { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+  #switch button {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 11px; font-size: 12px; cursor: pointer; font-family: inherit;
   }
-  .bar button:active { background: var(--btnActive); }
-  .error { color: var(--warn); font-size: 12.5px; margin-top: 8px; }
-  a { color: var(--accent); text-decoration: none; }
+  #switch button.on { color: var(--accent); border-color: var(--accent); background: var(--chip); }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; }
+  .stat .label { color: var(--muted); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .stat .num { font-size: 22px; font-weight: 650; margin-top: 4px; letter-spacing: -0.5px; }
+  .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .addr { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
+  .mono.addr-txt { font-size: 12.5px; word-break: break-all; }
+  button.copy {
+    background: var(--btn); color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 11px; font-size: 12px; cursor: pointer; flex: none; font-family: inherit;
+  }
+  button.copy:active { background: var(--btnActive); }
   .tok { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
   .tok:last-child { border-bottom: 0; }
   .tok .bal { color: var(--muted); }
@@ -94,94 +166,221 @@
   .bookrow .nm { font-size: 13.5px; font-weight: 550; }
   .bookrow .mono { font-size: 11px; color: var(--muted); }
   .bookrow.on .nm { color: var(--accent); }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row .k { color: var(--muted); font-size: 13px; }
+  .row .v { text-align: right; font-size: 13.5px; }
   .tx { display: flex; gap: 11px; padding: 11px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
   .tx:last-child { border-bottom: 0; }
-  .tx .ico { width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 13px; background: var(--btn); color: var(--muted); }
-  .tx .ico.in { background: var(--chipBg); color: var(--accent); }
-  .tx .ico.out { background: var(--chipWarnBg); color: var(--warn); }
+  .tx .ico {
+    width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center;
+    font-size: 13px; background: var(--btn); color: var(--muted);
+  }
+  .tx .ico.in { background: var(--chip); color: var(--accent); }
+  .tx .ico.out { background: var(--chipWarn); color: var(--warn); }
   .tx .body { flex: 1; min-width: 0; }
   .tx .title { font-size: 13.5px; font-weight: 550; }
   .tx .meta { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
   .tx .amt { font-size: 13px; text-align: right; flex: none; }
   .tx .amt .mono { display: block; color: var(--muted); font-size: 10.5px; margin-top: 2px; }
-  .badge { font-size: 10px; padding: 2px 7px; border-radius: 999px; background: var(--chipBg); color: var(--accent); margin-left: 6px; vertical-align: 1px; }
-  .badge.wait { background: var(--chipWarnBg); color: var(--warn); }
-  .switch { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
-  .switch button {
-    background: transparent; color: var(--muted); border: 1px solid var(--line);
-    border-radius: 999px; padding: 5px 11px; font-size: 12px; cursor: pointer;
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 999px; background: var(--chip); color: var(--accent); margin-left: 6px; vertical-align: 1px; }
+  .badge.wait { background: var(--chipWarn); color: var(--warn); }
+  .empty { color: var(--muted); font-size: 13px; padding: 6px 0; }
+  .frame {
+    border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: var(--cardTop);
   }
-  .switch button.on { color: var(--accent); border-color: var(--accent); background: var(--chipBg); }
-  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 22px; }
+  .frame .top {
+    display: flex; align-items: center; gap: 6px; padding: 10px 13px; border-bottom: 1px solid var(--line);
+  }
+  .frame .top i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); display: block; }
+  .frame .url { margin-left: 8px; color: var(--muted); font-size: 11.5px; }
+  .frame .body { padding: 16px; background: var(--bg); }
+
+  ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: s; }
+  ol.steps li {
+    counter-increment: s; display: flex; gap: 13px; align-items: flex-start;
+    background: var(--card); border: 1px solid var(--line); border-radius: 13px; padding: 15px 16px;
+  }
+  ol.steps li::before {
+    content: counter(s); flex: none; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--chip); color: var(--accent); display: grid; place-items: center;
+    font-size: 12px; font-weight: 700; margin-top: 1px;
+  }
+  ol.steps strong { display: block; font-size: 14px; }
+  ol.steps span { color: var(--muted); font-size: 13px; }
+
+  footer { border-top: 1px solid var(--line); padding: 26px 0 40px; color: var(--muted); font-size: 12.5px; }
+  footer .wrap { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--text); }
+
+  @media (max-width: 520px) {
+    nav .links a:not(.btn) { display: none; }
+    .strip { grid-template-columns: 1fr; }
+    .grid3 { grid-template-columns: 1fr; }
+    .hero { padding: 44px 0 40px; }
+  }
 </style>
 </head>
 <body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="mark">C</span> Crieves</div>
+    <div class="links">
+      <a href="#dashboard">Dashboard</a>
+      <a href="#features">Features</a>
+      <a href="#start">Get started</a>
+      <a class="btn primary sm" href="#dashboard">Live now</a>
+    </div>
+  </div>
+</nav>
+
 <div class="wrap">
-  <header>
-    <div class="logo">S</div>
-    <div>
-      <h1 id="safeName">Unfaithful Crieves</h1>
-      <div class="sub">Safe multisig &middot; Ethereum mainnet</div>
+  <div class="hero">
+    <span class="eyebrow"><span class="dot"></span>Read-only &middot; no wallet connection</span>
+    <h1>Your Safe, without<br><span class="gr">the dashboard weight</span></h1>
+    <p class="lede">A single fast page for balances, signing threshold and recent activity — straight from the Safe transaction service, live.</p>
+    <div class="cta">
+      <a class="btn primary" href="#dashboard">See it live &darr;</a>
+      <a class="btn" href="https://app.safe.global" target="_blank" rel="noreferrer">app.safe.global</a>
     </div>
-  </header>
 
-  <div class="bar">
-    <span id="status" class="pill"><span class="dot"></span><span id="statusText">connecting</span></span>
-    <span class="acts">
-      <button id="theme">Light</button>
-      <button id="refresh">Refresh</button>
-    </span>
-  </div>
+    <div class="pick" id="pick">
+      <button data-safe="0xF9CA3bc661066D31337B791295713B8d27900905">Unfaithful Crieves</button>
+      <button data-safe="0xD84c3Fc2581c9b2406e6F71B5f9Db1FB44ba0199">Thieves Eula</button>
+      <button data-safe="0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229">Sinful 9 (owner)</button>
+    </div>
 
-  <div class="switch" id="switch">
-    <button data-safe="0xF9CA3bc661066D31337B791295713B8d27900905">Unfaithful Crieves</button>
-    <button data-safe="0xD84c3Fc2581c9b2406e6F71B5f9Db1FB44ba0199">Thieves Eula</button>
-    <button data-safe="0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229">Sinful 9 (owner)</button>
-  </div>
-
-  <div class="grid3">
-    <div class="stat"><div class="label">Threshold</div><div class="num" id="threshold">1 / 1</div></div>    <div class="stat"><div class="label">Nonce</div><div class="num" id="nonce">1</div></div>
-    <div class="stat"><div class="label">Pending</div><div class="num" id="pending">&mdash;</div></div>
-  </div>
-
-  <div class="card">
-    <div class="label">Safe address</div>
-    <div class="addr">
-      <span class="mono" id="safeAddr">0xF9CA3bc661066D31337B791295713B8d27900905</span>
-      <button class="copy" id="copySafe" data-copy="0xF9CA3bc661066D31337B791295713B8d27900905">Copy</button>
+    <div class="strip">
+      <div><div class="k">Threshold</div><div class="v" id="s-threshold">—</div></div>
+      <div><div class="k">Balance</div><div class="v" id="s-balance">—</div></div>
+      <div><div class="k">Activity</div><div class="v" id="s-activity">—</div></div>
     </div>
   </div>
 
-  <div class="card">
-    <div class="label" style="margin-bottom:6px">Owner</div>
-    <div class="addr">
-      <div>
-        <div id="ownerName" style="font-size:14px">Sinful 9</div>
-        <span class="mono" id="ownerAddr">0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229</span>
+  <section id="dashboard">
+    <h2>Your Safe, live</h2>
+    <p class="sec-lede" id="dashLede">Everything below is read from the public Safe transaction service — no wallet, no keys.</p>
+
+    <div class="frame">
+      <div class="top"><i></i><i></i><i></i><span class="url" id="frameUrl">safe-dashboard</span></div>
+      <div class="body">
+
+        <div class="bar">
+          <span id="status" class="pill"><span class="dot"></span><span id="statusText">connecting</span></span>
+          <span class="acts">
+            <button class="btn sm" id="theme">Light</button>
+            <button class="btn sm" id="refresh">Refresh</button>
+          </span>
+        </div>
+
+        <div id="switch">
+          <button data-safe="0xF9CA3bc661066D31337B791295713B8d27900905">Unfaithful Crieves</button>
+          <button data-safe="0xD84c3Fc2581c9b2406e6F71B5f9Db1FB44ba0199">Thieves Eula</button>
+          <button data-safe="0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229">Sinful 9 (owner)</button>
+        </div>
+
+        <div class="grid3">
+          <div class="stat"><div class="label">Threshold</div><div class="num" id="threshold">—</div></div>
+          <div class="stat"><div class="label">Nonce</div><div class="num" id="nonce">—</div></div>
+          <div class="stat"><div class="label">Pending</div><div class="num" id="pending">—</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="label">Safe address</div>
+          <div class="addr">
+            <span class="mono addr-txt" id="safeAddr">—</span>
+            <button class="copy" id="copySafe">Copy</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="label" style="margin-bottom:6px">Owner</div>
+          <div class="addr">
+            <div>
+              <div id="ownerName" style="font-size:14px">—</div>
+              <span class="mono" id="ownerAddr"></span>
+            </div>
+            <button class="copy" id="copyOwner">Copy</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="label" style="margin-bottom:4px">Balances</div>
+          <div id="balances"><div class="tok"><span>Loading&hellip;</span></div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="label" style="margin-bottom:4px">Recent activity</div>
+          <div id="history"><div class="tx"><div class="body"><div class="title">Loading&hellip;</div></div></div></div>
+        </div>
+
+        <div class="card">
+          <div class="row"><span class="k">Network</span><span class="v">Ethereum (chain 1)</span></div>
+          <div class="row"><span class="k">Safe version</span><span class="v" id="version">—</span></div>
+          <div class="row"><span class="k">Address book</span><span class="v" id="bookCount">3 saved</span></div>
+          <div id="book" class="booklist"></div>
+        </div>
+
       </div>
-      <button class="copy" id="copyOwner" data-copy="0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229">Copy</button>
     </div>
-  </div>
+  </section>
 
-  <div class="card">
-    <div class="label" style="margin-bottom:4px">Balances</div>
-    <div id="balances"><div class="tok"><span>Loading&hellip;</span></div></div>
-  </div>
+  <section id="features">
+    <h2>Everything you check daily. Nothing you don't.</h2>
+    <p class="sec-lede">Built for one Safe you keep an eye on, not for managing an empire.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="ico">&#9679;</div>
+        <h3>Live balances</h3>
+        <p>Native ETH and every trusted token, refreshed on demand. No stale cache, no polling spam.</p>
+      </div>
+      <div class="card">
+        <div class="ico">&#9633;</div>
+        <h3>Signing state</h3>
+        <p>Threshold, owner set and nonce at a glance, so you know where a proposal actually stands.</p>
+      </div>
+      <div class="card">
+        <div class="ico">&#8595;</div>
+        <h3>Recent activity</h3>
+        <p>Incoming transfers and executed calls with fees, decoded when the Safe service knows the method.</p>
+      </div>
+      <div class="card">
+        <div class="ico">&#128274;</div>
+        <h3>No keys, ever</h3>
+        <p>Read-only by design. The page never asks for a signature, a seed phrase or a wallet connection.</p>
+      </div>
+      <div class="card">
+        <div class="ico">&#9788;</div>
+        <h3>Light or dark</h3>
+        <p>One tap, remembered locally. The palette follows your choice across every card.</p>
+      </div>
+      <div class="card">
+        <div class="ico">&#8599;</div>
+        <h3>Public data only</h3>
+        <p>All figures come from safe-transaction-mainnet.safe.global — the same public service the Safe app reads.</p>
+      </div>
+    </div>
+  </section>
 
-  <div class="card">
-    <div class="label" style="margin-bottom:4px">Recent activity</div>
-    <div id="history"><div class="tx"><div class="body"><div class="title">Loading&hellip;</div></div></div></div>
-  </div>
-
-  <div class="card">
-    <div class="row"><span class="k">Network</span><span class="v">Ethereum (chain 1)</span></div>
-    <div class="row"><span class="k">Safe version</span><span class="v" id="version">1.5.0</span></div>
-    <div class="row"><span class="k">Address book</span><span class="v">3 saved</span></div>
-    <div id="book" class="booklist"></div>
-  </div>
-
-  <footer>Live data from safe-transaction-mainnet.safe.global &middot; public read-only</footer>
+  <section id="start">
+    <h2>Three steps, no setup</h2>
+    <p class="sec-lede">Nothing to install, nothing to configure.</p>
+    <ol class="steps">
+      <li><div><strong>Pick a Safe</strong><span>The page opens on the configured Safe, or any address you link to with <span class="mono">?safe=0x…</span>.</span></div></li>
+      <li><div><strong>Read what matters</strong><span>Balances, signing state and recent transactions pull in automatically.</span></div></li>
+      <li><div><strong>Refresh when you need to</strong><span>One button re-reads the Safe service; nothing runs in the background.</span></div></li>
+    </ol>
+  </section>
 </div>
+
+<footer>
+  <div class="wrap">
+    <span>Read-only Safe viewer &middot; data from the public Safe transaction service</span>
+    <span>Not affiliated with Safe &middot; <a href="#dashboard">Dashboard</a></span>
+  </div>
+</footer>
 
 <script>
 const BOOK = [
@@ -189,181 +388,238 @@ const BOOK = [
   ["0xD84c3Fc2581c9b2406e6F71B5f9Db1FB44ba0199", "Unfaithful Thieves Eula"],
   ["0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229", "Sinful 9"]
 ];
-const NAMES = {
-  "0xf9ca3bc661066d31337b791295713b8d27900905": "Unfaithful Crieves",
-  "0xdd606ca9eff1077c02906f6fa89ffc4ed6726229": "Sinful 9",
-  "0xd84c3fc2581c9b2406e6f71b5f9db1fb44ba0199": "Unfaithful Thieves Eula"
-};
-const stored = (() => { try { return localStorage.getItem("crieves-safe"); } catch (e) { return null; } })();
-const SAFE = (new URLSearchParams(location.search).get("safe") || stored || "0xF9CA3bc661066D31337B791295713B8d27900905").trim();
-const API = "https://safe-transaction-mainnet.safe.global/api/v1/safes/" + SAFE + "/";
-const nameOf = a => NAMES[(a || "").toLowerCase()] || (a ? a.slice(0, 6) + "…" + a.slice(-4) : "");
+const NAMES = {};
+BOOK.forEach(([a, n]) => { NAMES[a.toLowerCase()] = n; });
+const DEFAULT_SAFE = "0xF9CA3bc661066D31337B791295713B8d27900905";
+const ADDR_RE = /^0x[0-9a-fA-F]{40}$/;
 
-function short(a) { return a ? a.slice(0, 6) + "…" + a.slice(-4) : ""; }
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const short = a => a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
+const nameOf = a => NAMES[(a || "").toLowerCase()] || (a ? short(a) : "—");
 
-function renderBook() {
-  return BOOK.map(([a, nm]) => {
-    const on = a.toLowerCase() === SAFE.toLowerCase();
-    return '<div class="bookrow' + (on ? " on" : "") + '"><div><div class="nm">' + nm + '</div>' +
-      '<span class="mono">' + a + '</span></div>' +
-      '<button class="copy" data-copy="' + a + '">Copy</button></div>';
-  }).join("");
+function initialSafe() {
+  let q = null;
+  try { q = new URLSearchParams(location.search).get("safe"); } catch (e) {}
+  if (q && ADDR_RE.test(q.trim())) return q.trim();
+  try {
+    const s = localStorage.getItem("crieves-safe");
+    if (s && ADDR_RE.test(s)) return s;
+  } catch (e) {}
+  return DEFAULT_SAFE;
 }
 
-function markSwitch() {
-  document.querySelectorAll("#switch button").forEach(b => {
+let SAFE = initialSafe();
+const apiFor = a => "https://safe-transaction-mainnet.safe.global/api/v1/safes/" + a + "/";
+
+function setStatus(text, ok) {
+  $("statusText").textContent = text;
+  $("status").className = "pill" + (ok ? "" : " warn");
+}
+
+function markPicks() {
+  document.querySelectorAll("[data-safe]").forEach(b => {
     b.classList.toggle("on", b.dataset.safe.toLowerCase() === SAFE.toLowerCase());
   });
 }
 
-function setStatus(text, ok) {
-  document.getElementById("statusText").textContent = text;
-  document.getElementById("status").className = "pill" + (ok ? "" : " warn");
+function renderBook() {
+  $("book").innerHTML = BOOK.map(([a, nm]) => {
+    const on = a.toLowerCase() === SAFE.toLowerCase();
+    return '<div class="bookrow' + (on ? " on" : "") + '"><div><div class="nm">' + esc(nm) + '</div>' +
+      '<span class="mono">' + esc(a) + "</span></div>" +
+      '<button class="copy" data-copy="' + esc(a) + '">Copy</button></div>';
+  }).join("");
+  $("bookCount").textContent = BOOK.length + " saved";
+}
+
+function fmtAmt(raw, dec) {
+  const d = (dec === null || dec === undefined) ? 18 : dec;
+  const amt = Number(raw) / Math.pow(10, d);
+  if (!isFinite(amt)) return "0";
+  return amt === 0 ? "0" : amt.toLocaleString(undefined, {maximumFractionDigits: 6});
+}
+
+function emptySafeState() {
+  $("threshold").textContent = "—";
+  $("nonce").textContent = "—";
+  $("pending").textContent = "—";
+  $("version").textContent = "—";
+  $("s-threshold").textContent = "—";
+  $("s-balance").textContent = "—";
+  $("s-activity").textContent = "—";
+  $("ownerName").textContent = "—";
+  $("ownerAddr").textContent = "";
+  $("copyOwner").setAttribute("data-copy", "");
 }
 
 async function load() {
+  const API = apiFor(SAFE);
+  const label = nameOf(SAFE);
   setStatus("loading", true);
+
+  $("safeAddr").textContent = SAFE;
+  $("copySafe").setAttribute("data-copy", SAFE);
+  $("dashLede").textContent = label + " · " + SAFE;
+  $("frameUrl").textContent = "safe-dashboard · " + short(SAFE);
+  document.title = label === "—" ? "Crieves — Safe viewer" : label + " — Crieves";
+  document.querySelectorAll('a[href="#dashboard"]').forEach(a => {
+    a.setAttribute("href", "#dashboard");
+  });
+  markPicks();
+  renderBook();
+
+  let isSafe = false;
   try {
     const res = await fetch(API, {headers: {"Accept": "application/json"}});
     if (res.status === 404) {
-      document.getElementById("safeName").textContent = nameOf(SAFE);
-      document.title = nameOf(SAFE) + " — not a Safe";
-      document.getElementById("safeAddr").textContent = SAFE;
-      document.getElementById("copySafe").setAttribute("data-copy", SAFE);
-      document.getElementById("ownerName").textContent = "—";
-      document.getElementById("ownerAddr").textContent = "";
-      document.getElementById("threshold").textContent = "—";
-      document.getElementById("nonce").textContent = "—";
-      document.getElementById("pending").textContent = "—";
-      document.getElementById("version").textContent = "—";
+      emptySafeState();
+      $("ownerName").textContent = "Plain account (EOA) — not a Safe contract";
       setStatus("not a Safe contract", false);
-      document.getElementById("book").innerHTML = renderBook();
-      document.getElementById("balances").innerHTML = '<div class="tok"><span>No Safe data at this address</span></div>';
-      document.getElementById("history").innerHTML = '<div class="tx"><div class="body"><div class="title">Plain account (EOA) — owner of the safes above</div><div class="meta">No Safe history to show</div></div></div>';
-      return;
-    }
-    const info = await res.json();
-    if (info.owners) {
-      document.getElementById("threshold").textContent = info.threshold + " / " + info.owners.length;
-      if (info.nonce !== undefined) document.getElementById("nonce").textContent = info.nonce;
-      if (info.version) document.getElementById("version").textContent = info.version;
-      document.getElementById("safeName").textContent = nameOf(SAFE);
-      document.title = nameOf(SAFE) + " — Safe Dashboard";
-      document.getElementById("safeAddr").textContent = SAFE;
-      document.getElementById("copySafe").setAttribute("data-copy", SAFE);
-      const o = info.owners[0] || "";
-      document.getElementById("ownerName").textContent = nameOf(o);
-      document.getElementById("ownerAddr").textContent = o;
-      document.getElementById("copyOwner").setAttribute("data-copy", o);
-      document.getElementById("book").innerHTML = renderBook();
-      setStatus("live", true);
+      $("balances").innerHTML = '<div class="empty">No Safe data at this address</div>';
+      $("history").innerHTML = '<div class="tx"><div class="body"><div class="title">No Safe history to show</div></div></div>';
     } else {
-      setStatus("not found", false);
+      const info = await res.json();
+      if (!info || !info.owners) throw new Error("unexpected payload");
+      const t = info.threshold + " / " + info.owners.length;
+      $("threshold").textContent = t;
+      $("s-threshold").textContent = info.threshold + "/" + info.owners.length;
+      if (info.nonce !== undefined) $("nonce").textContent = info.nonce;
+      if (info.version) $("version").textContent = info.version;
+      const o = info.owners[0] || "";
+      $("ownerName").textContent = nameOf(o);
+      $("ownerAddr").textContent = o;
+      $("copyOwner").setAttribute("data-copy", o);
+      setStatus("live", true);
+      renderBook();
+      try { localStorage.setItem("crieves-safe", SAFE); } catch (e) {}
     }
   } catch (e) {
-    setStatus("offline — cached values", false);
+    emptySafeState();
+    setStatus("service unreachable", false);
   }
 
   try {
     const pend = await (await fetch(API + "multisig-transactions/?limit=10&trusted=true")).json();
     const n = (pend.results || []).filter(t => !t.isExecuted).length;
-    document.getElementById("pending").textContent = n;
+    $("pending").textContent = n;
   } catch (e) {}
 
   try {
     const txs = await (await fetch(API + "all-transactions/?limit=10")).json();
-    const box = document.getElementById("history");
+    const self = SAFE.toLowerCase();
     const rows = (txs.results || []).map(t => {
       const when = t.executionDate || t.submissionDate;
       const date = when ? new Date(when).toISOString().slice(0, 10) : "";
-      const short = a => a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
-      let title, meta, amtHtml = "", cls = "";
       const tr = (t.transfers || [])[0];
+      let title = "", meta = "", amtHtml = "", cls = "";
+
       if (tr && tr.type === "ETHER_TRANSFER") {
-        const val = Number(tr.value) / 1e18;
-        const incoming = tr.to && tr.to.toLowerCase() === SAFE.toLowerCase();
+        const amt = Number(tr.value) / 1e18;
+        const incoming = !!tr.to && tr.to.toLowerCase() === self;
         cls = incoming ? "in" : "out";
         title = incoming ? "Received ETH" : "Sent ETH";
         meta = (incoming ? "from " : "to ") + short(incoming ? tr.from : tr.to) + " · " + date;
-        amtHtml = '<div class="amt">' + (incoming ? "+" : "−") + val.toFixed(6) + " ETH</div>";
+        amtHtml = '<div class="amt">' + (incoming ? "+" : "&minus;") + amt.toFixed(6) + " ETH</div>";
       } else if (t.dataDecoded && t.dataDecoded.method) {
         cls = "out";
-        title = "Safe deployed · " + t.dataDecoded.method;
+        title = "Safe call &middot; " + esc(t.dataDecoded.method);
         meta = "by " + short(t.executor || t.from) + " · " + date;
-        amtHtml = '<div class="amt"><span class="mono">' + (Number(t.fee || 0) / 1e18).toFixed(6) + ' ETH fee</span></div>';
+        amtHtml = '<div class="amt"><span class="mono">' + (Number(t.fee || 0) / 1e18).toFixed(6) + " ETH fee</span></div>";
       } else {
         cls = "out";
         title = "Contract call";
         meta = "to " + short(t.to) + " · " + date;
       }
-      const badge = t.isExecuted === false ? '<span class="badge wait">pending</span>' : '<span class="badge">executed</span>';
-      const icon = cls === "in" ? "↓" : "↑";
-      return '<div class="tx"><div class="ico ' + cls + '">' + icon + '</div>' +
-        '<div class="body"><div class="title">' + title + badge + '</div>' +
-        '<div class="meta">' + meta + '</div></div>' + amtHtml + '</div>';
+
+      const badge = t.isExecuted === false
+        ? '<span class="badge wait">pending</span>'
+        : '<span class="badge">executed</span>';
+      const icon = cls === "in" ? "&#8595;" : "&#8593;";
+      return '<div class="tx"><div class="ico ' + cls + '">' + icon + "</div>" +
+        '<div class="body"><div class="title">' + title + badge + "</div>" +
+        '<div class="meta">' + meta + "</div></div>" + amtHtml + "</div>";
     }).join("");
-    box.innerHTML = rows || '<div class="tx"><div class="body"><div class="title">No activity yet</div></div></div>';
+    $("history").innerHTML = rows || '<div class="tx"><div class="body"><div class="title">No activity yet</div></div></div>';
+    const n = (txs.results || []).length;
+    $("s-activity").textContent = n === 0 ? "none yet" : (n === 1 ? "1 tx" : n + " txs");
   } catch (e) {
-    document.getElementById("history").innerHTML = '<div class="tx"><div class="body"><div class="title">Could not load activity</div></div></div>';
+    $("history").innerHTML = '<div class="empty">Could not load activity</div>';
   }
 
   try {
     const bals = await (await fetch(API + "balances/?trusted=true")).json();
-    const box = document.getElementById("balances");
-    if (!bals.length) {
-      box.innerHTML = '<div class="tok"><span>No token balances</span></div>';
+    const box = $("balances");
+    if (!Array.isArray(bals) || !bals.length) {
+      box.innerHTML = '<div class="empty">No balances</div>';
+      $("s-balance").textContent = "0 ETH";
     } else {
+      let nativeTxt = null;
       box.innerHTML = bals.map(b => {
-        const dec = b.token && b.token.decimals !== null ? b.token.decimals : 18;
-        const sym = (b.token && b.token.symbol) || "ETH";
-        const amt = Number(b.balance) / Math.pow(10, dec);
-        const shown = amt === 0 ? "0" : amt.toLocaleString(undefined, {maximumFractionDigits: 6});
-        return '<div class="tok"><span>' + sym + '</span><span class="bal">' + shown + '</span></div>';
+        const sym = esc((b.token && b.token.symbol) || "ETH");
+        const shown = fmtAmt(b.balance, b.token && b.token.decimals);
+        if (nativeTxt === null && (!b.token || b.token.type === "NATIVE" || !b.token.symbol)) {
+          nativeTxt = shown + " ETH";
+        }
+        return '<div class="tok"><span>' + sym + '</span><span class="bal">' + esc(shown) + "</span></div>";
       }).join("");
+      if (nativeTxt === null) {
+        const b = bals[0];
+        nativeTxt = fmtAmt(b.balance, b.token && b.token.decimals) + " " + ((b.token && b.token.symbol) || "ETH");
+      }
+      $("s-balance").textContent = nativeTxt;
     }
   } catch (e) {
-    document.getElementById("balances").innerHTML = '<div class="tok"><span>Could not load balances</span></div>';
+    $("balances").innerHTML = '<div class="empty">Could not load balances</div>';
   }
 }
 
-document.getElementById("refresh").addEventListener("click", load);
-
-document.getElementById("switch").addEventListener("click", e => {
-  const btn = e.target.closest("button[data-safe]");
-  if (!btn) return;
-  const u = new URL(location.href);
-  u.searchParams.set("safe", btn.dataset.safe);
-  try { localStorage.setItem("crieves-safe", btn.dataset.safe); } catch (e) {}
-  location.href = u.toString();
-});
-
 function applyTheme(mode) {
   document.documentElement.setAttribute("data-theme", mode);
-  document.getElementById("theme").textContent = mode === "light" ? "Dark" : "Light";
+  $("theme").textContent = mode === "light" ? "Dark" : "Light";
   try { localStorage.setItem("safe-theme", mode); } catch (e) {}
 }
 
-let savedTheme = "dark";
-try { savedTheme = localStorage.getItem("safe-theme") || "dark"; } catch (e) {}
-applyTheme(savedTheme);
+$("refresh").addEventListener("click", load);
+$("theme").addEventListener("click", () => {
+  applyTheme(document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light");
+});
 
-document.getElementById("theme").addEventListener("click", () => {
-  const now = document.documentElement.getAttribute("data-theme");
-  applyTheme(now === "light" ? "dark" : "light");
+function pickSafe(addr) {
+  if (!ADDR_RE.test(addr)) return;
+  SAFE = addr;
+  try { localStorage.setItem("crieves-safe", SAFE); } catch (e) {}
+  try { history.replaceState(null, "", "?safe=" + SAFE + "#dashboard"); } catch (e) {}
+  load();
+}
+
+$("switch").addEventListener("click", e => {
+  const b = e.target.closest("button[data-safe]");
+  if (b) pickSafe(b.dataset.safe);
+});
+$("pick").addEventListener("click", e => {
+  const b = e.target.closest("button[data-safe]");
+  if (b) pickSafe(b.dataset.safe);
 });
 
 document.addEventListener("click", async e => {
   const btn = e.target.closest("button.copy");
   if (!btn) return;
   const val = btn.getAttribute("data-copy");
-  try { await navigator.clipboard.writeText(val); } catch (e) {}
+  if (val) {
+    try { await navigator.clipboard.writeText(val); } catch (err) {}
+  }
   const old = btn.textContent;
   btn.textContent = "Copied";
   setTimeout(() => { btn.textContent = old; }, 1200);
 });
 
+let savedTheme = "dark";
+try { savedTheme = localStorage.getItem("safe-theme") || "dark"; } catch (e) {}
+applyTheme(savedTheme);
+
+markPicks();
 load();
-markSwitch();
 </script>
 </body>
 </html>
