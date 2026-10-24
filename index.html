@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unfaithful Crieves — Safe Dashboard</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --card: #141922;
+    --line: #232b38;
+    --text: #e6ebf2;
+    --muted: #8b98ab;
+    --accent: #12ff80;
+    --warn: #ffb020;
+    --btn: #1d2531;
+    --btnActive: #26303f;
+    --glow: #16202e;
+    --chipBg: rgba(18,255,128,0.1);
+    --chipWarnBg: rgba(255,176,32,0.12);
+  }
+  html[data-theme="light"] {
+    --bg: #f4f6fa;
+    --card: #ffffff;
+    --line: #e3e8ef;
+    --text: #0f172a;
+    --muted: #64748b;
+    --accent: #0a8f4d;
+    --warn: #b45309;
+    --btn: #eef2f7;
+    --btnActive: #e2e8f0;
+    --glow: #dfe7f2;
+    --chipBg: rgba(10,143,77,0.1);
+    --chipWarnBg: rgba(180,83,9,0.1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: radial-gradient(1200px 600px at 50% -200px, var(--glow) 0%, var(--bg) 60%);
+    color: var(--text);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+  .logo {
+    width: 34px; height: 34px; border-radius: 10px; flex: none;
+    background: linear-gradient(140deg, var(--accent), #0a8f4d);
+    display: grid; place-items: center; color: #04120a; font-weight: 800; font-size: 17px;
+  }
+  h1 { font-size: 20px; margin: 0; letter-spacing: -0.2px; }
+  .sub { color: var(--muted); font-size: 13px; margin: 2px 0 22px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px; margin-bottom: 14px;
+  }
+  .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12.5px; word-break: break-all; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: 0; }
+  .row .k { color: var(--muted); font-size: 13px; }
+  .row .v { text-align: right; font-size: 13.5px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 13px 14px; }
+  .stat .num { font-size: 22px; font-weight: 650; margin-top: 4px; letter-spacing: -0.5px; }
+  .addr { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
+  button.copy {
+    background: var(--btn); color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 11px; font-size: 12px; cursor: pointer; flex: none;
+  }
+  button.copy:active { background: var(--btnActive); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 600; background: var(--chipBg); color: var(--accent);
+  }
+  .pill.warn { background: var(--chipWarnBg); color: var(--warn); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .bar .acts { display: flex; gap: 8px; }
+  .bar button {
+    background: var(--btn); color: var(--text); border: 1px solid var(--line); border-radius: 9px;
+    padding: 8px 14px; font-size: 13px; cursor: pointer;
+  }
+  .bar button:active { background: var(--btnActive); }
+  .error { color: var(--warn); font-size: 12.5px; margin-top: 8px; }
+  a { color: var(--accent); text-decoration: none; }
+  .tok { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+  .tok:last-child { border-bottom: 0; }
+  .tok .bal { color: var(--muted); }
+  .booklist { margin-top: 6px; }
+  .bookrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .bookrow:last-child { border-bottom: 0; }
+  .bookrow .nm { font-size: 13.5px; font-weight: 550; }
+  .bookrow .mono { font-size: 11px; color: var(--muted); }
+  .bookrow.on .nm { color: var(--accent); }
+  .tx { display: flex; gap: 11px; padding: 11px 0; border-bottom: 1px solid var(--line); align-items: flex-start; }
+  .tx:last-child { border-bottom: 0; }
+  .tx .ico { width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 13px; background: var(--btn); color: var(--muted); }
+  .tx .ico.in { background: var(--chipBg); color: var(--accent); }
+  .tx .ico.out { background: var(--chipWarnBg); color: var(--warn); }
+  .tx .body { flex: 1; min-width: 0; }
+  .tx .title { font-size: 13.5px; font-weight: 550; }
+  .tx .meta { color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+  .tx .amt { font-size: 13px; text-align: right; flex: none; }
+  .tx .amt .mono { display: block; color: var(--muted); font-size: 10.5px; margin-top: 2px; }
+  .badge { font-size: 10px; padding: 2px 7px; border-radius: 999px; background: var(--chipBg); color: var(--accent); margin-left: 6px; vertical-align: 1px; }
+  .badge.wait { background: var(--chipWarnBg); color: var(--warn); }
+  .switch { display: flex; gap: 7px; margin-bottom: 14px; flex-wrap: wrap; }
+  .switch button {
+    background: transparent; color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 5px 11px; font-size: 12px; cursor: pointer;
+  }
+  .switch button.on { color: var(--accent); border-color: var(--accent); background: var(--chipBg); }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 22px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">S</div>
+    <div>
+      <h1 id="safeName">Unfaithful Crieves</h1>
+      <div class="sub">Safe multisig &middot; Ethereum mainnet</div>
+    </div>
+  </header>
+
+  <div class="bar">
+    <span id="status" class="pill"><span class="dot"></span><span id="statusText">connecting</span></span>
+    <span class="acts">
+      <button id="theme">Light</button>
+      <button id="refresh">Refresh</button>
+    </span>
+  </div>
+
+  <div class="switch" id="switch">
+    <button data-safe="0xF9CA3bc661066D31337B791295713B8d27900905">Unfaithful Crieves</button>
+    <button data-safe="0xD84c3Fc2581c9b2406e6F71B5f9Db1FB44ba0199">Thieves Eula</button>
+    <button data-safe="0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229">Sinful 9 (owner)</button>
+  </div>
+
+  <div class="grid3">
+    <div class="stat"><div class="label">Threshold</div><div class="num" id="threshold">1 / 1</div></div>    <div class="stat"><div class="label">Nonce</div><div class="num" id="nonce">1</div></div>
+    <div class="stat"><div class="label">Pending</div><div class="num" id="pending">&mdash;</div></div>
+  </div>
+
+  <div class="card">
+    <div class="label">Safe address</div>
+    <div class="addr">
+      <span class="mono" id="safeAddr">0xF9CA3bc661066D31337B791295713B8d27900905</span>
+      <button class="copy" id="copySafe" data-copy="0xF9CA3bc661066D31337B791295713B8d27900905">Copy</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:6px">Owner</div>
+    <div class="addr">
+      <div>
+        <div id="ownerName" style="font-size:14px">Sinful 9</div>
+        <span class="mono" id="ownerAddr">0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229</span>
+      </div>
+      <button class="copy" id="copyOwner" data-copy="0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229">Copy</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:4px">Balances</div>
+    <div id="balances"><div class="tok"><span>Loading&hellip;</span></div></div>
+  </div>
+
+  <div class="card">
+    <div class="label" style="margin-bottom:4px">Recent activity</div>
+    <div id="history"><div class="tx"><div class="body"><div class="title">Loading&hellip;</div></div></div></div>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="k">Network</span><span class="v">Ethereum (chain 1)</span></div>
+    <div class="row"><span class="k">Safe version</span><span class="v" id="version">1.5.0</span></div>
+    <div class="row"><span class="k">Address book</span><span class="v">3 saved</span></div>
+    <div id="book" class="booklist"></div>
+  </div>
+
+  <footer>Live data from safe-transaction-mainnet.safe.global &middot; public read-only</footer>
+</div>
+
+<script>
+const BOOK = [
+  ["0xF9CA3bc661066D31337B791295713B8d27900905", "Unfaithful Crieves"],
+  ["0xD84c3Fc2581c9b2406e6F71B5f9Db1FB44ba0199", "Unfaithful Thieves Eula"],
+  ["0xDd606ca9Eff1077C02906F6FA89ffc4ED6726229", "Sinful 9"]
+];
+const NAMES = {
+  "0xf9ca3bc661066d31337b791295713b8d27900905": "Unfaithful Crieves",
+  "0xdd606ca9eff1077c02906f6fa89ffc4ed6726229": "Sinful 9",
+  "0xd84c3fc2581c9b2406e6f71b5f9db1fb44ba0199": "Unfaithful Thieves Eula"
+};
+const stored = (() => { try { return localStorage.getItem("crieves-safe"); } catch (e) { return null; } })();
+const SAFE = (new URLSearchParams(location.search).get("safe") || stored || "0xF9CA3bc661066D31337B791295713B8d27900905").trim();
+const API = "https://safe-transaction-mainnet.safe.global/api/v1/safes/" + SAFE + "/";
+const nameOf = a => NAMES[(a || "").toLowerCase()] || (a ? a.slice(0, 6) + "…" + a.slice(-4) : "");
+
+function short(a) { return a ? a.slice(0, 6) + "…" + a.slice(-4) : ""; }
+
+function renderBook() {
+  return BOOK.map(([a, nm]) => {
+    const on = a.toLowerCase() === SAFE.toLowerCase();
+    return '<div class="bookrow' + (on ? " on" : "") + '"><div><div class="nm">' + nm + '</div>' +
+      '<span class="mono">' + a + '</span></div>' +
+      '<button class="copy" data-copy="' + a + '">Copy</button></div>';
+  }).join("");
+}
+
+function markSwitch() {
+  document.querySelectorAll("#switch button").forEach(b => {
+    b.classList.toggle("on", b.dataset.safe.toLowerCase() === SAFE.toLowerCase());
+  });
+}
+
+function setStatus(text, ok) {
+  document.getElementById("statusText").textContent = text;
+  document.getElementById("status").className = "pill" + (ok ? "" : " warn");
+}
+
+async function load() {
+  setStatus("loading", true);
+  try {
+    const res = await fetch(API, {headers: {"Accept": "application/json"}});
+    if (res.status === 404) {
+      document.getElementById("safeName").textContent = nameOf(SAFE);
+      document.title = nameOf(SAFE) + " — not a Safe";
+      document.getElementById("safeAddr").textContent = SAFE;
+      document.getElementById("copySafe").setAttribute("data-copy", SAFE);
+      document.getElementById("ownerName").textContent = "—";
+      document.getElementById("ownerAddr").textContent = "";
+      document.getElementById("threshold").textContent = "—";
+      document.getElementById("nonce").textContent = "—";
+      document.getElementById("pending").textContent = "—";
+      document.getElementById("version").textContent = "—";
+      setStatus("not a Safe contract", false);
+      document.getElementById("book").innerHTML = renderBook();
+      document.getElementById("balances").innerHTML = '<div class="tok"><span>No Safe data at this address</span></div>';
+      document.getElementById("history").innerHTML = '<div class="tx"><div class="body"><div class="title">Plain account (EOA) — owner of the safes above</div><div class="meta">No Safe history to show</div></div></div>';
+      return;
+    }
+    const info = await res.json();
+    if (info.owners) {
+      document.getElementById("threshold").textContent = info.threshold + " / " + info.owners.length;
+      if (info.nonce !== undefined) document.getElementById("nonce").textContent = info.nonce;
+      if (info.version) document.getElementById("version").textContent = info.version;
+      document.getElementById("safeName").textContent = nameOf(SAFE);
+      document.title = nameOf(SAFE) + " — Safe Dashboard";
+      document.getElementById("safeAddr").textContent = SAFE;
+      document.getElementById("copySafe").setAttribute("data-copy", SAFE);
+      const o = info.owners[0] || "";
+      document.getElementById("ownerName").textContent = nameOf(o);
+      document.getElementById("ownerAddr").textContent = o;
+      document.getElementById("copyOwner").setAttribute("data-copy", o);
+      document.getElementById("book").innerHTML = renderBook();
+      setStatus("live", true);
+    } else {
+      setStatus("not found", false);
+    }
+  } catch (e) {
+    setStatus("offline — cached values", false);
+  }
+
+  try {
+    const pend = await (await fetch(API + "multisig-transactions/?limit=10&trusted=true")).json();
+    const n = (pend.results || []).filter(t => !t.isExecuted).length;
+    document.getElementById("pending").textContent = n;
+  } catch (e) {}
+
+  try {
+    const txs = await (await fetch(API + "all-transactions/?limit=10")).json();
+    const box = document.getElementById("history");
+    const rows = (txs.results || []).map(t => {
+      const when = t.executionDate || t.submissionDate;
+      const date = when ? new Date(when).toISOString().slice(0, 10) : "";
+      const short = a => a ? a.slice(0, 6) + "…" + a.slice(-4) : "";
+      let title, meta, amtHtml = "", cls = "";
+      const tr = (t.transfers || [])[0];
+      if (tr && tr.type === "ETHER_TRANSFER") {
+        const val = Number(tr.value) / 1e18;
+        const incoming = tr.to && tr.to.toLowerCase() === SAFE.toLowerCase();
+        cls = incoming ? "in" : "out";
+        title = incoming ? "Received ETH" : "Sent ETH";
+        meta = (incoming ? "from " : "to ") + short(incoming ? tr.from : tr.to) + " · " + date;
+        amtHtml = '<div class="amt">' + (incoming ? "+" : "−") + val.toFixed(6) + " ETH</div>";
+      } else if (t.dataDecoded && t.dataDecoded.method) {
+        cls = "out";
+        title = "Safe deployed · " + t.dataDecoded.method;
+        meta = "by " + short(t.executor || t.from) + " · " + date;
+        amtHtml = '<div class="amt"><span class="mono">' + (Number(t.fee || 0) / 1e18).toFixed(6) + ' ETH fee</span></div>';
+      } else {
+        cls = "out";
+        title = "Contract call";
+        meta = "to " + short(t.to) + " · " + date;
+      }
+      const badge = t.isExecuted === false ? '<span class="badge wait">pending</span>' : '<span class="badge">executed</span>';
+      const icon = cls === "in" ? "↓" : "↑";
+      return '<div class="tx"><div class="ico ' + cls + '">' + icon + '</div>' +
+        '<div class="body"><div class="title">' + title + badge + '</div>' +
+        '<div class="meta">' + meta + '</div></div>' + amtHtml + '</div>';
+    }).join("");
+    box.innerHTML = rows || '<div class="tx"><div class="body"><div class="title">No activity yet</div></div></div>';
+  } catch (e) {
+    document.getElementById("history").innerHTML = '<div class="tx"><div class="body"><div class="title">Could not load activity</div></div></div>';
+  }
+
+  try {
+    const bals = await (await fetch(API + "balances/?trusted=true")).json();
+    const box = document.getElementById("balances");
+    if (!bals.length) {
+      box.innerHTML = '<div class="tok"><span>No token balances</span></div>';
+    } else {
+      box.innerHTML = bals.map(b => {
+        const dec = b.token && b.token.decimals !== null ? b.token.decimals : 18;
+        const sym = (b.token && b.token.symbol) || "ETH";
+        const amt = Number(b.balance) / Math.pow(10, dec);
+        const shown = amt === 0 ? "0" : amt.toLocaleString(undefined, {maximumFractionDigits: 6});
+        return '<div class="tok"><span>' + sym + '</span><span class="bal">' + shown + '</span></div>';
+      }).join("");
+    }
+  } catch (e) {
+    document.getElementById("balances").innerHTML = '<div class="tok"><span>Could not load balances</span></div>';
+  }
+}
+
+document.getElementById("refresh").addEventListener("click", load);
+
+document.getElementById("switch").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-safe]");
+  if (!btn) return;
+  const u = new URL(location.href);
+  u.searchParams.set("safe", btn.dataset.safe);
+  try { localStorage.setItem("crieves-safe", btn.dataset.safe); } catch (e) {}
+  location.href = u.toString();
+});
+
+function applyTheme(mode) {
+  document.documentElement.setAttribute("data-theme", mode);
+  document.getElementById("theme").textContent = mode === "light" ? "Dark" : "Light";
+  try { localStorage.setItem("safe-theme", mode); } catch (e) {}
+}
+
+let savedTheme = "dark";
+try { savedTheme = localStorage.getItem("safe-theme") || "dark"; } catch (e) {}
+applyTheme(savedTheme);
+
+document.getElementById("theme").addEventListener("click", () => {
+  const now = document.documentElement.getAttribute("data-theme");
+  applyTheme(now === "light" ? "dark" : "light");
+});
+
+document.addEventListener("click", async e => {
+  const btn = e.target.closest("button.copy");
+  if (!btn) return;
+  const val = btn.getAttribute("data-copy");
+  try { await navigator.clipboard.writeText(val); } catch (e) {}
+  const old = btn.textContent;
+  btn.textContent = "Copied";
+  setTimeout(() => { btn.textContent = old; }, 1200);
+});
+
+load();
+markSwitch();
+</script>
+</body>
+</html>
