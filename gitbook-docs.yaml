@@ -1,0 +1,29 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+site:
+  title: https://github.com/jdmfwryn2w-ux/landing-page
+  structure:
+    - type: section
+      key: section-1
+      title: https://github.com/jdmfwryn2w-ux/landing-page
+      path: https-github.com-jdmfwryn2w-ux-landing-page
+      default: true
+      children:
+        - type: space
+          key: space-1
+          title: Documentation
+          path: debug-browser-overflow
+          default: true
+          content:
+            directory: ./https-github.com-jdmfwryn2w-ux-landing-page/debug-browser-overflow
+        - type: space
+          key: space-2
+          title: github.com/jdmfwryn2w-ux/landing-page/blob/jdmfwryn2w-ux/3-debug-browser-overflow/1/webpack.config.js
+          path: landing-page
+          draft: true
+          content:
+            directory: ./https-github.com-jdmfwryn2w-ux-landing-page/landing-page
+    - type: external-link
+      key: external-link-1
+      title: "debugger "
+      url: https://github.com/jdmfwryn2w-ux/landing-page/blob/jdmfwryn2w-ux/3-debug-browser-overflow/1/webpack.config.js
+      draft: true
